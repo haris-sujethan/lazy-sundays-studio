@@ -1,14 +1,4 @@
-# Dependencies
-node_modules/
-
-# Build output (deploy with npm run deploy:pages → gh-pages branch)
-dist/
-
-# Local / tool caches
-.cache/
-*.log
+node_modules
+dist
 .DS_Store
-
-# Env
-.env
-.env.*.local
+*.log
