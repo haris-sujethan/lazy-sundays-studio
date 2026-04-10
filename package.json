@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
     "build": "vite build",
-    "deploy:pages": "npm run build && gh-pages -d dist"
+    "build:pages": "VITE_BASE=/lazy-sundays-studio/ vite build",
+    "deploy:pages": "npm run build:pages && gh-pages -d dist"
   },
   "keywords": [],
   "author": "",

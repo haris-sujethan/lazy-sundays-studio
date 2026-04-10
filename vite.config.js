@@ -1,13 +1,10 @@
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 
 /**
- * Dev (`npm run dev`): base is "/" (development mode; .env.production not applied).
- * Production build (`npm run build`): reads VITE_BASE from `.env.production`
- * (GitHub project page: /repo-name/).
+ * Local dev: base defaults to "/".
+ * GitHub Pages (project site): set VITE_BASE to "/your-repo-name/" in CI
+ * (see .github/workflows/deploy-pages.yml). User/org site username.github.io uses "/".
  */
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
-  return {
-    base: env.VITE_BASE || process.env.VITE_BASE || "/",
-  };
+export default defineConfig({
+  base: process.env.VITE_BASE ?? "/",
 });
