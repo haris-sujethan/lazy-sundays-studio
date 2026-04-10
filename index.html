@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lazy Sundays Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        background: #000;
+      }
+
+      :root {
+        --landing-header-h: 88px;
+      }
+
+      #intro {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+      }
+
+      #intro-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 60px;
+      }
+
+      #intro-logo {
+        display: block;
+        width: 320px;
+        height: auto;
+        object-fit: contain;
+        object-position: center;
+        image-rendering: auto;
+        filter: drop-shadow(0 0 0 transparent);
+      }
+
+      #enter-btn {
+        margin-top: 20px;
+        padding: 8px 20px;
+        background: transparent;
+        border: none;
+        font-family: "DM Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        color: rgba(0, 0, 0, 0.6);
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        outline: none;
+        box-shadow: none;
+        transition: color 0.2s ease;
+      }
+      #enter-btn:hover {
+        background: transparent;
+        color: #000;
+      }
+
+      #video-stage {
+        position: fixed;
+        inset: 0;
+        z-index: 5;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.35s ease;
+      }
+      #video-stage.is-active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #video-stage.is-fading-out {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.45s ease;
+      }
+
+      #ascii-canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        z-index: 1;
+        opacity: 1;
+        transition: opacity 0.45s ease;
+      }
+
+      .visually-hidden-video {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      #landing {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        background: #fff;
+        color: #000;
+        opacity: 0;
+        pointer-events: none;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      #landing.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #landing-content {
+        opacity: 0;
+      }
+      #landing-content.is-revealed {
+        opacity: 1;
+        transition: opacity 0.6s ease;
+      }
+
+      #landing-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 30;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 24px 48px;
+        background: transparent;
+        pointer-events: none;
+      }
+      #landing.is-visible #landing-header {
+        background: #fff;
+      }
+      #landing-header .landing-header-social {
+        pointer-events: auto;
+      }
+
+      .landing-header-social {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .landing-header-social a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        opacity: 0.6;
+        transition: opacity 0.2s ease;
+      }
+      .landing-header-social a:hover {
+        opacity: 1;
+      }
+      .landing-header-social svg {
+        width: 22px;
+        height: 22px;
+        display: block;
+      }
+
+      .landing-body {
+        padding-top: var(--landing-header-h);
+      }
+
+      .landing-title-frame {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - var(--landing-header-h));
+        min-height: calc(100dvh - var(--landing-header-h));
+        padding: 32px 48px 48px;
+        text-align: center;
+      }
+
+      .landing-tagline {
+        font-family: "Helvetica Neue", Helvetica, sans-serif;
+        font-weight: 300;
+        font-size: 42px;
+        line-height: 1.5;
+        margin: 0 0 1rem;
+        max-width: 20ch;
+        color: #000;
+      }
+
+      .landing-tagline-sub {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        color: rgba(0, 0, 0, 0.45);
+        margin: 0;
+      }
+
+      .work-section-label {
+        font-family: "DM Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.35);
+        margin: 0;
+        padding: 80px 48px 0;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .work-grid {
+        display: grid;
+        grid-template-columns: 2fr 3fr;
+        gap: 80px 48px;
+        padding: 80px 48px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .work-item:nth-child(1) {
+        grid-column: 1;
+      }
+      .work-item:nth-child(2) {
+        grid-column: 2;
+      }
+      .work-item:nth-child(3) {
+        grid-column: 1;
+      }
+      .work-item:nth-child(4) {
+        grid-column: 2;
+      }
+
+      .work-item:nth-child(even) {
+        margin-top: 120px;
+      }
+
+      .work-item.contact {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 48px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        background: transparent;
+        margin-top: 0;
+      }
+
+      .work-item.contact .work-item-link {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: space-between;
+        gap: 32px;
+        width: 100%;
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .work-item.contact .contact-copy {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .work-item.contact .contact-copy h3 {
+        margin-top: 0;
+      }
+
+      .work-item.contact .work-cta {
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .work-item-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .work-item .thumb {
+        width: 100%;
+        aspect-ratio: 3/4;
+        background: #f0f0f0;
+        overflow: hidden;
+      }
+
+      .work-item .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .work-item h3 {
+        font-family: "Helvetica Neue", Helvetica, sans-serif;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 1.3;
+        margin: 16px 0 8px;
+        color: #000;
+      }
+
+      .work-desc {
+        font-family: "Helvetica Neue", Helvetica, sans-serif;
+        font-size: 13px;
+        line-height: 1.4;
+        color: rgba(0, 0, 0, 0.5);
+        margin: 0 0 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .work-cta {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        color: #000;
+      }
+      .work-item-link:hover .work-cta {
+        text-decoration: underline;
+      }
+
+      #landing-footer {
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 60px 48px;
+        text-align: center;
+      }
+
+      .landing-footer-line1 {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #000;
+        margin: 0 0 12px;
+      }
+
+      .landing-footer-line2 {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        color: #000;
+        opacity: 0.45;
+        margin: 0;
+      }
+
+      @media (max-width: 900px) {
+        .work-grid {
+          grid-template-columns: 1fr;
+          gap: 48px;
+          padding: 48px 24px;
+        }
+        .work-item:nth-child(n) {
+          grid-column: 1;
+          margin-top: 0;
+        }
+        .work-item:nth-child(even) {
+          margin-top: 0;
+        }
+        .work-item.contact {
+          padding: 32px 24px;
+        }
+        .work-item.contact .work-item-link {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 20px;
+        }
+        .work-section-label {
+          padding: 48px 24px 0;
+        }
+        #landing-header {
+          padding: 20px 24px;
+        }
+        .landing-title-frame {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+        .landing-tagline {
+          font-size: 28px;
+        }
+        #landing-footer {
+          padding: 48px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section id="intro" aria-label="Intro">
+      <div id="intro-content">
+        <img
+          id="intro-logo"
+          src="/logo.png"
+          alt="Lazy Sundays Studio"
+          decoding="async"
+        />
+        <button type="button" id="enter-btn">Enter ↗</button>
+      </div>
+    </section>
+
+    <div id="video-stage">
+      <video
+        id="source-video"
+        class="visually-hidden-video"
+        src="/video.mp4"
+        playsinline
+        preload="auto"
+      ></video>
+      <canvas id="ascii-canvas" aria-hidden="true"></canvas>
+    </div>
+
+    <main id="landing" aria-label="Lazy Sundays Studio">
+      <header id="landing-header">
+        <div class="landing-header-social">
+          <a
+            href="https://www.youtube.com/@lazy.sundays.studio"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                d="M23.5 6.2c-.3-1.1-1.1-1.9-2.2-2.2C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.3.5C1.6 4.3.8 5.1.5 6.2 0 8 0 12 0 12s0 4 .5 5.8c.3 1.1 1.1 1.9 2.2 2.2 1.8.5 9.3.5 9.3.5s7.5 0 9.3-.5c1.1-.3 1.9-1.1 2.2-2.2.5-1.8.5-5.8.5-5.8s0-4-.5-5.8zM9.5 15.5v-7l6 3.5-6 3.5z"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://www.instagram.com/lazy.sundays.studio/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.9.3 2.3.5.6.2 1 .5 1.5 1 .5.5.8.9 1 1.5.2.4.4 1.1.5 2.3.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 1.9-.5 2.3-.2.6-.5 1-1 1.5-.5.5-.9.8-1.5 1-.4.2-1.1.4-2.3.5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.9-.3-2.3-.5-.6-.2-1-.5-1.5-1-.5-.5-.8-.9-1-1.5-.2-.4-.4-1.1-.5-2.3-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.3-1.9.5-2.3.2-.6.5-1 1-1.5.5-.5.9-.8 1.5-1 .4-.2 1.1-.4 2.3-.5 1.3-.1 1.7-.1 4.9-.1zm0 2.2c-3.1 0-3.5 0-4.7.1-.9.1-1.3.2-1.6.3-.4.2-.7.4-.9.7-.3.3-.5.5-.7.9-.1.3-.3.7-.3 1.6-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1.9.2 1.3.3 1.6.2.4.4.7.7.9.3.3.5.5.9.7.3.1.7.3 1.6.3 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c.9-.1 1.3-.2 1.6-.3.4-.2.7-.4.9-.7.3-.3.5-.5.7-.9.1-.3.3-.7.3-1.6.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-.9-.2-1.3-.3-1.6-.2-.4-.4-.7-.7-.9-.3-.3-.5-.5-.9-.7-.3-.1-.7-.3-1.6-.3-1.2-.1-1.6-.1-4.7-.1z"
+              />
+              <path
+                d="M12 15.3a3.3 3.3 0 1 1 0-6.6 3.3 3.3 0 0 1 0 6.6zm0-8.4a5.1 5.1 0 1 0 0 10.2 5.1 5.1 0 0 0 0-10.2zm5.3-.8a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0z"
+              />
+            </svg>
+          </a>
+        </div>
+      </header>
+
+      <div id="landing-content">
+        <div class="landing-body">
+          <div class="landing-title-frame">
+            <p class="landing-tagline">
+              We thrive on crafting stories<br />
+              and inspiring the next adventure.
+            </p>
+            <p class="landing-tagline-sub">
+              Creative Studio &amp; Mountain Bike Culture Hub
+            </p>
+          </div>
+
+          <p class="work-section-label">Work</p>
+
+          <div class="work-grid">
+            <article class="work-item">
+              <a
+                class="work-item-link"
+                href="https://youtu.be/DGrb8mzaYGA"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="thumb">
+                  <img
+                    src="/work/ej-days.png"
+                    alt=""
+                    width="800"
+                    height="1067"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <h3>EJ DAYS EP01 South Of Here</h3>
+                <p class="work-desc">
+                  The next chapter of Elliot&rsquo;s racing career kicked off in
+                  California with his younger brother, best friend, and training
+                  partner, Nash.
+                </p>
+                <span class="work-cta">Watch →</span>
+              </a>
+            </article>
+            <article class="work-item">
+              <a
+                class="work-item-link"
+                href="https://youtu.be/i93c67yKr6E"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="thumb">
+                  <img
+                    src="/work/white-noise.png"
+                    alt=""
+                    width="800"
+                    height="1067"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <h3>WHITE NOISE Ft. Jakob Jewett</h3>
+                <p class="work-desc">
+                  Jakob is not only one of the most naturally talented riders we
+                  know, but creatively, he brings a fresh, unique perspective and
+                  style to mountain bike media.
+                </p>
+                <span class="work-cta">Watch →</span>
+              </a>
+            </article>
+            <article class="work-item">
+              <a
+                class="work-item-link"
+                href="https://youtu.be/VozK1MZb32o"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="thumb">
+                  <img
+                    src="/work/skylines.png"
+                    alt=""
+                    width="800"
+                    height="1067"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <h3>SKYLINES Ft. Alden Pate</h3>
+                <p class="work-desc">
+                  Founded in Los Angeles and later moved to Bellingham. Crestline
+                  shares its roots in both green forests and iconic tracks.
+                  Skylines highlights Crestline&rsquo;s heritage.
+                </p>
+                <span class="work-cta">Watch →</span>
+              </a>
+            </article>
+            <article class="work-item">
+              <a
+                class="work-item-link"
+                href="https://youtu.be/q-WNG3bCyuQ"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="thumb">
+                  <img
+                    src="/work/sticks-stones.png"
+                    alt=""
+                    width="800"
+                    height="1067"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <h3>STICKS &amp; STONES Ft. Alden Pate</h3>
+                <p class="work-desc">
+                  Speed and style - it&rsquo;s a wild combo many of us dream of.
+                  Alden, on the other hand, has both, and neither is in short
+                  supply.
+                </p>
+                <span class="work-cta">Watch →</span>
+              </a>
+            </article>
+            <article class="work-item contact">
+              <a
+                class="work-item-link"
+                href="https://lazysundays.shop/password"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="contact-copy">
+                  <h3>Stay In The Loop</h3>
+                  <p class="work-desc">
+                    Lazy Sundays is more than just mountain bike media. Be the
+                    first to know when the next chapter arrives.
+                  </p>
+                </div>
+                <span class="work-cta">Learn More →</span>
+              </a>
+            </article>
+          </div>
+
+          <footer id="landing-footer">
+            <p class="landing-footer-line1">
+              Mountain Bike Culture &amp; Storytelling.
+            </p>
+            <p class="landing-footer-line2">
+              A Creative Studio by @jake.paddon &amp; @aedanskinner
+            </p>
+          </footer>
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
