@@ -1,4 +1,4 @@
-Landing page for lazy sundays studio.
+## Landing page for lazy sundays studio.
 
 Developed with the new pretext library (April 2026)
 
